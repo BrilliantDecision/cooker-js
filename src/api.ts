@@ -71,6 +71,19 @@ const NullObject = /* @__PURE__ */ (() => {
   return C;
 })() as unknown as { new (): any };
 
+const priorityVals = new Map([
+  ["low", "Low"],
+  ["medium", "Medium"],
+  ["high", "High"],
+]);
+
+const sameSiteVals = new Map<string | boolean, string>([
+  [true, "Strict"],
+  ["strict", "Strict"],
+  ["lax", "Lax"],
+  ["none", "None"],
+]);
+
 /**
  * Parse options.
  */
@@ -97,7 +110,7 @@ export interface ParseOptions {
  */
 export function parse(
   str: string,
-  options?: ParseOptions,
+  options?: ParseOptions
 ): Record<string, string | undefined> {
   const obj: Record<string, string | undefined> = new NullObject();
   const len = str.length;
@@ -248,9 +261,21 @@ export interface SerializeOptions {
 export function serialize(
   name: string,
   val: string,
-  options?: SerializeOptions,
+  options?: SerializeOptions
 ): string {
-  const enc = options?.encode || encodeURIComponent;
+  const {
+    encode,
+    maxAge,
+    domain,
+    path,
+    expires,
+    httpOnly,
+    secure,
+    partitioned,
+    priority,
+    sameSite,
+  } = options || {};
+  const enc = encode || encodeURIComponent;
 
   if (!cookieNameRegExp.test(name)) {
     throw new TypeError(`argument name is invalid: ${name}`);
@@ -265,92 +290,70 @@ export function serialize(
   let str = name + "=" + value;
   if (!options) return str;
 
-  if (options.maxAge !== undefined) {
-    if (!Number.isInteger(options.maxAge)) {
-      throw new TypeError(`option maxAge is invalid: ${options.maxAge}`);
+  if (maxAge !== undefined) {
+    if (!Number.isInteger(maxAge)) {
+      throw new TypeError(`option maxAge is invalid: ${maxAge}`);
     }
 
-    str += "; Max-Age=" + options.maxAge;
+    str += "; Max-Age=" + maxAge;
   }
 
-  if (options.domain) {
-    if (!domainValueRegExp.test(options.domain)) {
-      throw new TypeError(`option domain is invalid: ${options.domain}`);
+  if (domain) {
+    if (!domainValueRegExp.test(domain)) {
+      throw new TypeError(`option domain is invalid: ${domain}`);
     }
 
-    str += "; Domain=" + options.domain;
+    str += "; Domain=" + domain;
   }
 
-  if (options.path) {
-    if (!pathValueRegExp.test(options.path)) {
-      throw new TypeError(`option path is invalid: ${options.path}`);
+  if (path) {
+    if (!pathValueRegExp.test(path)) {
+      throw new TypeError(`option path is invalid: ${path}`);
     }
 
-    str += "; Path=" + options.path;
+    str += "; Path=" + path;
   }
 
-  if (options.expires) {
-    if (
-      !isDate(options.expires) ||
-      !Number.isFinite(options.expires.valueOf())
-    ) {
-      throw new TypeError(`option expires is invalid: ${options.expires}`);
+  if (expires) {
+    if (!isDate(expires) || !Number.isFinite(expires.valueOf())) {
+      throw new TypeError(`option expires is invalid: ${expires}`);
     }
 
-    str += "; Expires=" + options.expires.toUTCString();
+    str += "; Expires=" + expires.toUTCString();
   }
 
-  if (options.httpOnly) {
+  if (httpOnly) {
     str += "; HttpOnly";
   }
 
-  if (options.secure) {
+  if (secure) {
     str += "; Secure";
   }
 
-  if (options.partitioned) {
+  if (partitioned) {
     str += "; Partitioned";
   }
 
-  if (options.priority) {
-    const priority =
-      typeof options.priority === "string"
-        ? options.priority.toLowerCase()
-        : undefined;
-    switch (priority) {
-      case "low":
-        str += "; Priority=Low";
-        break;
-      case "medium":
-        str += "; Priority=Medium";
-        break;
-      case "high":
-        str += "; Priority=High";
-        break;
-      default:
-        throw new TypeError(`option priority is invalid: ${options.priority}`);
-    }
+  if (priority) {
+    const priorityParsed =
+      typeof priority === "string" ? priority.toLowerCase() : "";
+    const optPriority = priorityVals.get(priorityParsed);
+
+    if (!priorityParsed || !optPriority)
+      throw new TypeError(`option priority is invalid: ${priority}`);
+
+    str = "; Priority=" + optPriority;
   }
 
-  if (options.sameSite) {
-    const sameSite =
-      typeof options.sameSite === "string"
-        ? options.sameSite.toLowerCase()
-        : options.sameSite;
-    switch (sameSite) {
-      case true:
-      case "strict":
-        str += "; SameSite=Strict";
-        break;
-      case "lax":
-        str += "; SameSite=Lax";
-        break;
-      case "none":
-        str += "; SameSite=None";
-        break;
-      default:
-        throw new TypeError(`option sameSite is invalid: ${options.sameSite}`);
-    }
+  if (sameSite) {
+    const sameSiteParsed =
+      typeof sameSite === "string" ? sameSite.toLowerCase() : sameSite;
+    const optSameSite = sameSiteVals.get(sameSiteParsed);
+
+    if (!sameSiteParsed || !optSameSite)
+      throw new TypeError(`option sameSite is invalid: ${sameSite}`);
+
+    str = "; SameSite=" + optSameSite;
   }
 
   return str;
