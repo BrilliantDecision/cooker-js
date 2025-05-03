@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "lib": ["es5", "es6", "dom"],
+    "target": "es5",
+    "declaration": true,
+    "declarationDir": "dist",
+    "outDir": "dist",
+    "module": "es2015",
+    "moduleResolution": "bundler"
+  },
+  "include": ["src/**/*", "rollup.config.mjs"]
+}
