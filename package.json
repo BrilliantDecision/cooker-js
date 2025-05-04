@@ -1,6 +1,6 @@
 {
-  "name": "use-cookie-js",
-  "version": "1.0.0",
+  "name": "cooker-js",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -11,7 +11,7 @@
   "scripts": {
     "build": "rollup -c ./rollup.config.mjs"
   },
-  "keywords": [],
+  "keywords": ["cookie", "js"],
   "author": "Alexandr Rybalko",
   "license": "MIT",
   "devDependencies": {
