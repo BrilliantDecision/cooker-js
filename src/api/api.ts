@@ -1,7 +1,7 @@
 import { parse, serialize } from "../cookie";
 import { SerializeOptions } from "../cookie/serialize/types";
 import { isBrowser } from "../utils/common";
-import { ServerOptsGet, ServerOptsSet } from "./types";
+import { SetCookieOpts, ServerOptsGet } from "./types";
 
 /**
  * Function to set cookie on the client/server
@@ -10,11 +10,7 @@ import { ServerOptsGet, ServerOptsSet } from "./types";
  * @param opts - cookie options
  * @returns string with the cookie and options
  */
-const setCookie = (
-  name: string,
-  val: string,
-  opts?: SerializeOptions & ServerOptsSet
-) => {
+const setCookie = (name: string, val: string, opts?: SetCookieOpts) => {
   if (isBrowser) {
     return (document.cookie = serialize(name, val, { path: "/", ...opts }));
   } else {
@@ -44,7 +40,7 @@ const getCookie = (name: string, opts?: ServerOptsGet) => {
  * @param name - cookie name
  * @param opts - cookie options
  */
-const clearCookie = (name: string, opts?: SerializeOptions & ServerOptsSet) => {
+const clearCookie = (name: string, opts?: SetCookieOpts) => {
   setCookie(name, "", opts);
 };
 
@@ -53,10 +49,7 @@ const clearCookie = (name: string, opts?: SerializeOptions & ServerOptsSet) => {
  * @param name - cookie name
  * @param opts - cookie options
  */
-const removeCookie = (
-  name: string,
-  opts?: SerializeOptions & ServerOptsSet
-) => {
+const removeCookie = (name: string, opts?: SetCookieOpts) => {
   setCookie(name, "", { ...opts, maxAge: -1 });
 };
 
