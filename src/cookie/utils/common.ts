@@ -26,3 +26,12 @@ export function decode(str: string): string {
     return str;
   }
 }
+
+const __toString = Object.prototype.toString;
+
+/**
+ * Determine if value is a Date.
+ */
+export function isDate(val: any): val is Date {
+  return __toString.call(val) === "[object Date]";
+}

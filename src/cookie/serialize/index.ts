@@ -1,3 +1,4 @@
+import { isDate } from "../utils/common";
 import {
   cookieNameRegExp,
   cookieValueRegExp,
@@ -6,15 +7,6 @@ import {
 } from "../utils/regExp";
 import { SerializeOptions } from "./types";
 
-/**
- * Serialize data into a cookie header.
- *
- * Serialize a name value pair into a cookie string suitable for
- * http headers. An optional options object specifies cookie parameters.
- *
- * serialize('foo', 'bar', { httpOnly: true })
- *   => "foo=bar; httpOnly"
- */
 export function serialize(
   name: string,
   val: string,
@@ -35,24 +27,100 @@ export function serialize(
   let str = name + "=" + value;
   if (!options) return str;
 
-  if (options.domain && !domainValueRegExp.test(options.domain)) {
-    throw new TypeError(`option domain is invalid: ${options.domain}`);
+  if (options.maxAge !== undefined) {
+    if (!Number.isInteger(options.maxAge)) {
+      throw new TypeError(`option maxAge is invalid: ${options.maxAge}`);
+    }
+
+    str += "; Max-Age=" + options.maxAge;
   }
 
-  if (options.path && !pathValueRegExp.test(options.path)) {
-    throw new TypeError(`option path is invalid: ${options.path}`);
+  if (options.domain) {
+    if (!domainValueRegExp.test(options.domain)) {
+      throw new TypeError(`option domain is invalid: ${options.domain}`);
+    }
+
+    str += "; Domain=" + options.domain;
   }
 
-  if (options.expires instanceof Date) {
-    options.expires = options.expires.toUTCString();
+  if (options.path) {
+    if (!pathValueRegExp.test(options.path)) {
+      throw new TypeError(`option path is invalid: ${options.path}`);
+    }
+
+    str += "; Path=" + options.path;
   }
 
-  for (let opt in options) {
-    str += "; " + opt;
-    let optionValue = options[opt];
+  if (options.expires && options.numberOfDays === undefined) {
+    if (
+      !isDate(options.expires) ||
+      !Number.isFinite(options.expires.valueOf())
+    ) {
+      throw new TypeError(`option expires is invalid: ${options.expires}`);
+    }
 
-    if (optionValue !== true) {
-      str += "=" + optionValue;
+    str += "; Expires=" + options.expires.toUTCString();
+  }
+
+  if (options.numberOfDays) {
+    const GetDate = new Date();
+    GetDate.setTime(
+      GetDate.getTime() + options.numberOfDays * 24 * 60 * 60 * 1000
+    );
+
+    str += "; Expires=" + GetDate.toUTCString();
+  }
+
+  if (options.httpOnly) {
+    str += "; HttpOnly";
+  }
+
+  if (options.secure) {
+    str += "; Secure";
+  }
+
+  if (options.partitioned) {
+    str += "; Partitioned";
+  }
+
+  if (options.priority) {
+    const priority =
+      typeof options.priority === "string"
+        ? options.priority.toLowerCase()
+        : undefined;
+    switch (priority) {
+      case "low":
+        str += "; Priority=Low";
+        break;
+      case "medium":
+        str += "; Priority=Medium";
+        break;
+      case "high":
+        str += "; Priority=High";
+        break;
+      default:
+        throw new TypeError(`option priority is invalid: ${options.priority}`);
+    }
+  }
+
+  if (options.sameSite) {
+    const sameSite =
+      typeof options.sameSite === "string"
+        ? options.sameSite.toLowerCase()
+        : options.sameSite;
+    switch (sameSite) {
+      case true:
+      case "strict":
+        str += "; SameSite=Strict";
+        break;
+      case "lax":
+        str += "; SameSite=Lax";
+        break;
+      case "none":
+        str += "; SameSite=None";
+        break;
+      default:
+        throw new TypeError(`option sameSite is invalid: ${options.sameSite}`);
     }
   }
 

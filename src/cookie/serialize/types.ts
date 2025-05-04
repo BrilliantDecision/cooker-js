@@ -1,7 +1,7 @@
 export interface SerializeOptions {
   encode?: (str: string) => string;
   maxAge?: number;
-  expires?: Date | string;
+  expires?: Date;
   domain?: string;
   path?: string;
   httpOnly?: boolean;
@@ -9,4 +9,5 @@ export interface SerializeOptions {
   partitioned?: boolean;
   priority?: "low" | "medium" | "high";
   sameSite?: boolean | "lax" | "strict" | "none";
+  numberOfDays?: number;
 }
