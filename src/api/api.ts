@@ -1,4 +1,5 @@
-import { parse, serialize, SerializeOptions } from "cookie";
+import { parse, serialize } from "../cookie";
+import { SerializeOptions } from "../cookie/serialize/types";
 import { isBrowser } from "../utils/common";
 import { ServerOptsGet, ServerOptsSet } from "./types";
 
