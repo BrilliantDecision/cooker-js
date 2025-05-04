@@ -1,10 +1,15 @@
 {
-  "name": "cooker-js",
+  "name": "use-cookie-js",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rollup -c ./rollup.config.mjs"
   },
   "keywords": [],
   "author": "Alexandr Rybalko",
@@ -12,5 +17,9 @@
   "devDependencies": {
     "rollup": "^4.40.0",
     "vitest": "^3.1.2"
+  },
+  "dependencies": {
+    "@types/node": "^22.15.3",
+    "cookie": "^1.0.2"
   }
 }
