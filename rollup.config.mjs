@@ -14,11 +14,13 @@ export default [
         file: packageJson.main,
         format: "cjs",
         sourcemap: true,
+        external: ["http"],
       },
       {
         file: packageJson.module,
         format: "es",
         sourcemap: true,
+        external: ["http"],
       },
     ],
     plugins: [
@@ -26,6 +28,7 @@ export default [
       commonjs(),
       resolve(),
       typescript({ tsconfig: "./tsconfig.json" }),
+
       terser(),
     ],
   },
